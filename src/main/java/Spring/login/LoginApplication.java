@@ -17,19 +17,20 @@ public class LoginApplication {
 	public static void main(String[] args) {
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("persistence");
 		EntityManager em = emf.createEntityManager();
-
 		EntityTransaction tx = em.getTransaction();
 		tx.begin();
 
-		User user = new User(null, "test", "testid", "testpw", Grade.CLIENT);
-		em.persist(user);
-		tx.commit();
-
-
-		em.close();
+		try {
+			User user = new User(null, "test", "testid", "testpw", Grade.CLIENT);
+			em.persist(user);
+			tx.commit();
+		} catch (Exception e) {
+			tx.rollback();
+		} finally {
+			em.close();
+		}
 		emf.close();
 
 		SpringApplication.run(LoginApplication.class, args);
 	}
-
 }
