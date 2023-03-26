@@ -14,12 +14,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(User user) {
-        userRepository.save(user);
+    public void signup(User user) {
+
     }
 
     @Override
-    public User findByUserid(String userid) {
-        return userRepository.findByUserid(userid);
+    public void findMember(String userid) {
+
+    }
+
+    @Override
+    public String findPassword(String userid) {
+        return null;
+    }
+
+    @Override
+    public void changePassword(String userid, String password) {
+
+    }
+
+    @Override
+    public void deleteUser(String userid) {
+
+    }
+
+    @Override
+    public void logout(String userid) {
+
     }
 }
