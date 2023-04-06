@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "user")
 @Getter
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class User {
     @Id
@@ -37,8 +37,5 @@ public class User {
         this.password = password;
     }
 
-    public void changeUsername(String username) {
-        this.username = username;
-    }
 }
 

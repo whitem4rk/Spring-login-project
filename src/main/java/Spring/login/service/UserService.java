@@ -5,13 +5,13 @@ import Spring.login.domain.user.User;
 public interface UserService {
     void signup(User user);
 
-    void findMember(String userid);
+    User findUser(String userid);
 
     String findPassword(String userid);
 
-    void changePassword(String userid, String password);
+    void changePassword(String userid, String password, String newPassword);
 
-    void deleteUser(String userid);
+    void deleteUser(String userid, String password);
 
     void logout(String userid);
 }
