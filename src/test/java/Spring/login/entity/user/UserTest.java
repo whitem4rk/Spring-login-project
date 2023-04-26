@@ -1,13 +1,13 @@
-package Spring.login.domain.user;
+package Spring.login.entity.user;
 
-import org.assertj.core.api.Assertions;
+import Spring.domain.login.entity.user.Grade;
+import Spring.domain.login.entity.user.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class UserTest {
@@ -24,7 +24,7 @@ class UserTest {
     @Test
     public void createWhenSubjectIsEmptyShouldThrowException() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new User(null, "", "","",Grade.CLIENT))
+                .isThrownBy(() -> new User(null, "", "","", Grade.CLIENT))
                 .withMessage("User empty test passed");
     }
 
