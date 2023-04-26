@@ -1,8 +1,8 @@
-package Spring.login;
+package Spring;
 
-import Spring.login.repository.UserRepository;
-import Spring.login.service.UserService;
-import Spring.login.service.UserServiceImpl;
+import Spring.domain.login.repository.UserRepository;
+import Spring.domain.login.service.UserService;
+import Spring.domain.login.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package Spring.login.entity.user;
+package Spring.domain.login.entity.user;
 
 public enum Grade {
     CLIENT, ADMIN
