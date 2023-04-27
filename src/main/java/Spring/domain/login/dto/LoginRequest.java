@@ -15,7 +15,7 @@ public class LoginRequest {
     private String userid;
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
-    @Length(max = 20, message = "비밀번호는 20문자 이하여야 합니다.")
+    @Length(max = 30, message = "비밀번호는 30문자 이하여야 합니다.")
     private String password;
 
 }
