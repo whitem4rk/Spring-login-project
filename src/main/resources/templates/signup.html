@@ -17,25 +17,25 @@
               <br>
               <form th:object="${registerForm}" th:action="@{/signup}" method="post">
                 <div class="form-outline form-white mb-4">
-                  <input type="text" th:field="*{username}" id="username" name="username" class="form-control form-control-lg" placeholder="닉네임" />
+                  <input type="text" field="*{username}" id="username" name="username" class="form-control form-control-lg" placeholder="닉네임" />
                 </div>
 
                 <div class="form-outline form-white mb-4">
-                  <input type="text" th:field="*{userid}" id="userid" name="userid" class="form-control form-control-lg" placeholder="아이디" />
+                  <input type="text" field="*{userid}" id="userid" name="userid" class="form-control form-control-lg" placeholder="아이디" />
                 </div>
 
                 <div class="form-outline form-white mb-4">
-                  <input type="password" th:field="*{password}" id="password" name="password" class="form-control form-control-lg" placeholder="비밀번호" />
-                </div>
-
-
-                <div class="form-outline form-white mb-4">
-                  <input type="email" th:field="*{email}" id="email" name="email" class="form-control form-control-lg" placeholder="비밀번호" />
+                  <input type="password" field="*{password}" id="password" name="password" class="form-control form-control-lg" placeholder="비밀번호" />
                 </div>
 
 
                 <div class="form-outline form-white mb-4">
-                  <input type="code" th:field="*{code}" id="code" name="code" class="form-control form-control-lg" placeholder="비밀번호" />
+                  <input type="email" field="*{email}" id="email" name="email" class="form-control form-control-lg" placeholder="이메일" />
+                </div>
+
+
+                <div class="form-outline form-white mb-4">
+                  <input type="code" field="*{code}" id="code" name="code" class="form-control form-control-lg" placeholder="인증코드" />
                 </div>
 
                 <p class="small mb-5 pb-lg-2"><a class="text-white-50" href="/findPassword">비밀번호 찾기</a></p>
