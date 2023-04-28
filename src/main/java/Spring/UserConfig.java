@@ -18,9 +18,5 @@ public class UserConfig {
         return new UserServiceImpl(userRepository);
     }
 
-//    @Bean
-//    public Repository repository() {
-//        return new
-//    }
 
 }
