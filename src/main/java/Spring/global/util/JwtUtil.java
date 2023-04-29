@@ -26,4 +26,6 @@ public class JwtUtil {
     public JwtUtil(@Value("${jwt.key}") byte[] key) {
         this.JWT_KEY = Keys.hmacShaKeyFor(key);
     }
+
+    public
 }
