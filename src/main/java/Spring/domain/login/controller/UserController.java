@@ -2,19 +2,19 @@ package Spring.domain.login.controller;
 
 import Spring.domain.login.dto.LoginRequest;
 import Spring.domain.login.dto.RegisterRequest;
-import Spring.domain.login.entity.user.Grade;
+import Spring.domain.login.dto.UpdatePasswordRequest;
 import Spring.domain.login.entity.user.User;
+import Spring.domain.login.exception.JwtInvalidException;
 import Spring.domain.login.service.UserService;
-import Spring.domain.login.service.UserServiceImpl;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Slf4j
@@ -39,13 +39,7 @@ public class UserController {
 
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("loginForm") LoginRequest loginRequest, RedirectAttributes redirectAttributes) {
-        User userExists = userService.findUser(loginRequest.getUserid(), loginRequest.getPassword());
-        if (userExists != null) {
-            redirectAttributes.addFlashAttribute("username", userExists.getUsername());
-            return "redirect:/home";
-        } else {
-            return "/login";
-        }
+        throw new JwtInvalidException();
     }
 
     @GetMapping("/signup")
@@ -61,5 +55,17 @@ public class UserController {
         } else {
             return "/signup";
         }
+    }
+
+    @PostMapping("/reissue")
+    public String reissue(@CookieValue(value = "refreshToken", required = false) Cookie refreshCookie) {
+        throw new JwtInvalidException();
+    }
+
+    @PutMapping("/updatepw")
+    public String updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        userService.changePassword(updatePasswordRequest);
+
+        return "redirect:/login";
     }
 }
