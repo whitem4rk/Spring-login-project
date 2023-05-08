@@ -21,7 +21,7 @@ public class JwtAuthenticationToken extends UsernamePasswordAuthenticationToken 
     }
 
     public static JwtAuthenticationToken of(Object principal, Object credentials,
-                                            Collection<? extends GrantedAuthority authorities>) {
+                                            Collection<? extends GrantedAuthority> authorities) {
         return new JwtAuthenticationToken(principal, credentials, authorities);
     }
 }

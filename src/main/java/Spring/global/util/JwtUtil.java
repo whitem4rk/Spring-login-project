@@ -37,7 +37,8 @@ public class JwtUtil {
     private final Key JWT_KEY;
     @Value("${access-token-expires}")
     private long ACCESS_TOKEN_EXPIRES;
-    @Value("${refresh-token-expires")
+
+    @Value("${refresh-token-expires}")
     private long REFRESH_TOKEN_EXPIRES;
 
     public JwtUtil(@Value("${jwt.key}") byte[] key) {
@@ -119,6 +120,7 @@ public class JwtUtil {
         return JwtAuthenticationToken.of(principal, token, authorities);
     }
 
+
     private Claims parseClaims(String token) throws BusinessException {
         try {
             return Jwts.parserBuilder().setSigningKey(JWT_KEY).build().parseClaimsJws(token).getBody();
@@ -128,4 +130,16 @@ public class JwtUtil {
             throw new JwtInvalidException();
         }
     }
+
+    public String extractJwt(String authenticationHeader) {
+        if (authenticationHeader == null) {
+            throw new JwtInvalidException();
+        } else if (!authenticationHeader.startsWith(BEARER_TYPE_PREFIX)) {
+            throw new JwtInvalidException();
+        }
+        return authenticationHeader.substring(JWT_PREFIX_LENGTH);
+    }
+
+
+
 }

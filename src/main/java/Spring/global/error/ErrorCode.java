@@ -18,8 +18,8 @@ public enum ErrorCode {
     PASSWORD_EQUAL_WITH_OLD(400, "M009", "기존 비밀번호와 동일하게 변경할 수 없습니다."),
     JWT_INVALID(401, "J001", "유효하지 않은 토큰입니다."),
     JWT_EXPIRED(401, "J002", "만료된 토큰입니다."),
-    EXPIRED_REFRESH_TOKEN(401, "J003", "만료된 REFRESH 토큰입니다. 재로그인 해주십시오.");
-
+    EXPIRED_REFRESH_TOKEN(401, "J003", "만료된 REFRESH 토큰입니다. 재로그인 해주십시오."),
+    FILTER_MUST_RESPOND(500, "G010", "필터에서 처리해야 할 요청이 Controller에 접근하였습니다.");
     private final int status;
     private final String code;
     private final String message;
