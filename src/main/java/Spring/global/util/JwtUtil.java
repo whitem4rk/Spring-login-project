@@ -5,7 +5,7 @@ import Spring.domain.login.entity.user.User;
 import Spring.domain.login.exception.JwtExpiredException;
 import Spring.domain.login.exception.JwtInvalidException;
 import Spring.global.error.BusinessException;
-import Spring.global.token.JwtAuthenticationToken;
+import Spring.global.security.token.JwtAuthenticationToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;

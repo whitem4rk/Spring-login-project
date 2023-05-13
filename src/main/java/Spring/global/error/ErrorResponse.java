@@ -32,4 +32,7 @@ public class ErrorResponse {
         this.errors = new ArrayList<>();
     }
 
+    public static ErrorResponse of(final ErrorCode code) {
+        return new ErrorResponse(code);
+    }
 }

@@ -4,12 +4,14 @@ import Spring.domain.login.dto.LoginRequest;
 import Spring.domain.login.dto.RegisterRequest;
 import Spring.domain.login.dto.UpdatePasswordRequest;
 import Spring.domain.login.entity.user.User;
+import Spring.domain.login.exception.FilterMustResponseException;
 import Spring.domain.login.exception.JwtInvalidException;
 import Spring.domain.login.service.UserService;
-import jakarta.servlet.http.Cookie;
-import jakarta.validation.Valid;
+import javax.servlet.http.Cookie;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,7 +26,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
     private final UserService userService;
-    private final int REFRESH_TOKEN_EXPIRES = 60 * 60 * 24; // 1일
+    @Value("${refresh-token-expires}")
+    private final int REFRESH_TOKEN_EXPIRES;
 
     @GetMapping("/home")
     public String home(@ModelAttribute("username") String username, Model model) {
@@ -39,7 +42,7 @@ public class UserController {
 
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("loginForm") LoginRequest loginRequest, RedirectAttributes redirectAttributes) {
-        throw new JwtInvalidException();
+        throw new FilterMustResponseException();
     }
 
     @GetMapping("/signup")
@@ -51,7 +54,7 @@ public class UserController {
     public String signup(@Valid @ModelAttribute("registerForm") RegisterRequest registerRequest) {
         final boolean isRegistered = userService.signup(registerRequest);
         if (isRegistered) {
-            return "redirect:/home";
+            return "redirect:/login";
         } else {
             return "/signup";
         }

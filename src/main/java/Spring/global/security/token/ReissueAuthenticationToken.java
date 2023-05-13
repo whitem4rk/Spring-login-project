@@ -1,4 +1,4 @@
-package Spring.global.token;
+package Spring.global.security.token;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 

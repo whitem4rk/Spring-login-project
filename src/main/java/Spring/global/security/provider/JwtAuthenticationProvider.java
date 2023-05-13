@@ -1,6 +1,6 @@
-package Spring.global.provider;
+package Spring.global.security.provider;
 
-import Spring.global.token.JwtAuthenticationToken;
+import Spring.global.security.token.JwtAuthenticationToken;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

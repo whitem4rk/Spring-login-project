@@ -2,15 +2,16 @@ package Spring.global.security.handler;
 
 import Spring.domain.login.dto.JwtDto;
 import Spring.domain.login.dto.JwtResponse;
+import Spring.domain.login.service.RefreshTokenService;
 import Spring.global.result.ResultCode;
 import Spring.global.result.ResultResponse;
 import Spring.global.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -28,22 +29,23 @@ import java.util.Map;
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
-    //    private final RefreshTokenService refreshTokenService;
+    private final RefreshTokenService refreshTokenService;
     private final ResultCode DEFAULT_RESULT_CODE = ResultCode.LOGOUT_SUCCESS;
     private Map<String, ResultCode> resultCodeMap;
-    @Value("${refresh_token_expires}")
-    private final int REFRESH_TOKEN_EXPIRES;
-    @Value("${server-domain}")
-    private String SERVER_DOMAIN;
+    @Value("${refresh-token-expires}")
+    private int REFRESH_TOKEN_EXPIRES;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
+                                        Authentication authentication) throws IOException, ServletException {
         this.onAuthenticationSuccess(request, response, authentication);
     }
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
         final JwtDto jwtDto = jwtUtil.generateJwtDto(authentication);
+        refreshTokenService.addRefreshToken(Long.valueOf(authentication.getName()), jwtDto.getRefreshToken());
         final JwtResponse jwtResponse = JwtResponse.builder()
                 .type(jwtDto.getType())
                 .accessToken(jwtDto.getAccessToken())
