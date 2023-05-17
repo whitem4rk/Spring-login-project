@@ -24,7 +24,7 @@ public class User {
     @Column(length = 30, nullable = false, unique = true)
     private String userid;
 
-    @Column(length = 30, nullable = false)
+    @Column(nullable = false)
     private String password;
 
     @Column(length = 100, nullable = false, unique = true)
@@ -50,6 +50,10 @@ public class User {
 
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void setEncryptedPassword(String encryptedPassword) {
+        this.password = encryptedPassword;
     }
 
 }

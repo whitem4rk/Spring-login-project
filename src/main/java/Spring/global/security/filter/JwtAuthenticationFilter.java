@@ -4,6 +4,7 @@ import Spring.global.security.token.JwtAuthenticationToken;
 import Spring.global.util.JwtUtil;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
     private final JwtUtil jwtUtil;
 
     public JwtAuthenticationFilter(RequestMatcher matcher, JwtUtil jwtUtil) {
@@ -29,11 +29,10 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException, IOException, ServletException {
+        final Cookie[] cookies = request.getCookies();
+        final String jwt = jwtUtil.extractJwt(cookies);
 
-        final String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
-        final String jwt = jwtUtil.extractJwt(authorizationHeader);
         final JwtAuthenticationToken authentication = JwtAuthenticationToken.of(jwt);
-
         return super.getAuthenticationManager().authenticate(authentication);
     }
 

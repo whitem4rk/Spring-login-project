@@ -22,11 +22,6 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        try (OutputStream os = response.getOutputStream()) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writeValue(os, ErrorResponse.of(ErrorCode.ACCOUNT_MISMATCH));
-            os.flush();
-        }
+        response.sendRedirect("/login");
     }
 }

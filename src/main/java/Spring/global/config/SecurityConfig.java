@@ -3,6 +3,7 @@ package Spring.global.config;
 import Spring.domain.login.service.CustomUserDetailsService;
 import Spring.global.result.ResultCode;
 import Spring.global.security.CustomRequestMatcher;
+import Spring.global.security.filter.CustomExceptionHandlerFilter;
 import Spring.global.security.filter.CustomUseridPasswordAuthenticationFilter;
 import Spring.global.security.filter.JwtAuthenticationFilter;
 import Spring.global.security.filter.ReissueAuthenticationFilter;
@@ -49,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final CustomExceptionHandlerFilter customExceptionHandlerFilter;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -120,6 +122,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
+        http.formLogin()
+                .loginPage("/login")
+                .defaultSuccessUrl("/home")
+                .and()
+                .logout()
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login");
+
         http.cors()
                 .and()
                 .csrf().disable()
@@ -130,9 +140,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .antMatchers(AUTH_WHITELIST)
                 .permitAll()
-                .anyRequest().hasAuthority("USER");
+                .anyRequest().hasAuthority("CLIENT");
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
         http.addFilterBefore(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
         http.addFilterBefore(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
 

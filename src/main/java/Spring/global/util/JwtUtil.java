@@ -17,6 +17,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.Cookie;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Date;
@@ -31,8 +32,8 @@ public class JwtUtil {
     private final static String CLAIM_MEMBER_ID_KEY = "userid";
     private final static String BEARER_TYPE_PREFIX = "Bearer ";
     private final static String BEARER_TYPE = "Bearer";
-    private final static String ACCESS_TOKEN_SUBJECT = "AccessToken";
-    private final static String REFRESH_TOKEN_SUBJECT = "RefreshToken";
+    private final static String ACCESS_TOKEN_SUBJECT = "accessToken";
+    private final static String REFRESH_TOKEN_SUBJECT = "refreshToken";
     private static final int JWT_PREFIX_LENGTH = 7;
     private final Key JWT_KEY;
     @Value("${access-token-expires}")
@@ -131,13 +132,24 @@ public class JwtUtil {
         }
     }
 
-    public String extractJwt(String authenticationHeader) {
-        if (authenticationHeader == null) {
-            throw new JwtInvalidException();
-        } else if (!authenticationHeader.startsWith(BEARER_TYPE_PREFIX)) {
+    public String extractJwt(Cookie[] cookies) {
+        if (cookies == null) {
             throw new JwtInvalidException();
         }
-        return authenticationHeader.substring(JWT_PREFIX_LENGTH);
+
+        String cookieToken = null;
+        for (Cookie c : cookies) {
+            if (c.getName().equals(REFRESH_TOKEN_SUBJECT)) {
+                cookieToken = c.getValue();
+                break;
+            }
+        }
+
+        if (cookieToken == null) {
+            throw new JwtInvalidException();
+        }
+
+        return cookieToken;
     }
 
 
