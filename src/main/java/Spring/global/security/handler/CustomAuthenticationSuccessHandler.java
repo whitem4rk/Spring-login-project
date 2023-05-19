@@ -28,6 +28,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     private Map<String, ResultCode> resultCodeMap;
     @Value("${refresh-token-expires}")
     private int REFRESH_TOKEN_EXPIRES;
+    @Value("${access-token-expires}")
+    private int ACCESS_TOKEN_EXPIRES;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
@@ -40,7 +42,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
                                         Authentication authentication) throws IOException, ServletException {
         final JwtDto jwtDto = jwtUtil.generateJwtDto(authentication);
         refreshTokenService.addRefreshToken(Long.valueOf(authentication.getName()), jwtDto.getRefreshToken());
-        addCookie(response, jwtDto.getRefreshToken());
+
+        addCookie(response, "accessToken", jwtDto.getAccessToken(), ACCESS_TOKEN_EXPIRES);
+        addCookie(response, "refreshToken", jwtDto.getRefreshToken(), REFRESH_TOKEN_EXPIRES);
 
         final ResultCode resultCode = getResultCode(request);
         response.setStatus(resultCode.getStatus());
@@ -59,9 +63,10 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         }
     }
 
-    protected void addCookie(HttpServletResponse response, String refreshTokenString) {
-        final Cookie cookie = new Cookie("refreshToken", refreshTokenString);
-        cookie.setMaxAge(REFRESH_TOKEN_EXPIRES);
+    protected void addCookie(HttpServletResponse response, String cookieName, String TokenString,
+                             int expires) {
+        final Cookie cookie = new Cookie(cookieName, TokenString);
+        cookie.setMaxAge(expires);
 
         // cookie.setSecure(true); https 미지원
         cookie.setHttpOnly(true);

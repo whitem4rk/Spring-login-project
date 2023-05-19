@@ -139,9 +139,8 @@ public class JwtUtil {
 
         String cookieToken = null;
         for (Cookie c : cookies) {
-            if (c.getName().equals(REFRESH_TOKEN_SUBJECT)) {
+            if (c.getName().equals(ACCESS_TOKEN_SUBJECT)) {
                 cookieToken = c.getValue();
-                break;
             }
         }
 
@@ -151,7 +150,5 @@ public class JwtUtil {
 
         return cookieToken;
     }
-
-
 
 }
