@@ -13,7 +13,7 @@ public class AuthUtil {
 
     private final UserRepository userRepository;
 
-    public Long getLoginMemberIdOrNull() {
+    public Long getLoginIdOrNull() {
         try {
             final String id = SecurityContextHolder.getContext().getAuthentication().getName();
             return Long.valueOf(id);
@@ -22,7 +22,7 @@ public class AuthUtil {
         }
     }
 
-    public Long getLoginUserid() {
+    public Long getLoginId() {
         try {
             final String id = SecurityContextHolder.getContext().getAuthentication().getName();
             return Long.valueOf(id);

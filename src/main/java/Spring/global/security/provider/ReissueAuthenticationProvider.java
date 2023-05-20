@@ -24,8 +24,8 @@ public class ReissueAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         final String refreshTokenString = (String) authentication.getPrincipal();
         final Authentication authenticated = jwtUtil.getAuthentication(refreshTokenString);
-        final String memberId = (String) authenticated.getName();
-        final RefreshToken refreshToken = refreshTokenService.findRefreshToken(Long.valueOf(memberId),
+        final String id = (String) authenticated.getName();
+        final RefreshToken refreshToken = refreshTokenService.findRefreshToken(Long.valueOf(id),
                 refreshTokenString).orElseThrow(LogoutByAnotherException::new);
         this.deleteRefreshToken(refreshToken);
         return authenticated;

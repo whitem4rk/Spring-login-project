@@ -21,25 +21,24 @@ public class RefreshToken implements Serializable {
 
     @Id
     @Indexed
-    private String id;
+    private String pk;
 
     @Indexed
     private String value;
 
     @Indexed
-    private Long memberId;
+    private Long id;
 
     @TimeToLive(unit = TimeUnit.DAYS)
     private Long timeout = 7L;
 
     private LocalDateTime lastUpdateDate;
 
-    private String city;
 
     @Builder
-    public RefreshToken(Long memberId, String value) {
+    public RefreshToken(Long id, String value) {
         this.lastUpdateDate = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-        this.memberId = memberId;
+        this.id = id;
         this.value = value;
     }
 

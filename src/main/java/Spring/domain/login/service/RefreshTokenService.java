@@ -18,17 +18,17 @@ public class RefreshTokenService {
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @Transactional
-    public void addRefreshToken(Long memberId, String tokenValue) {
+    public void addRefreshToken(Long id, String tokenValue) {
         final RefreshToken refreshToken = RefreshToken.builder()
-                .memberId(memberId)
+                .id(id)
                 .value(tokenValue)
                 .build();
         refreshTokenRedisRepository.save(refreshToken);
     }
 
     @Transactional(readOnly = true)
-    public Optional<RefreshToken> findRefreshToken(Long memberId, String value) {
-        return refreshTokenRedisRepository.findByMemberIdAndValue(memberId, value);
+    public Optional<RefreshToken> findRefreshToken(Long id, String value) {
+        return refreshTokenRedisRepository.findByIdAndValue(id, value);
     }
 
     @Transactional
@@ -37,15 +37,15 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void deleteRefreshTokenByValue(Long memberId, String value) {
-        final RefreshToken refreshToken = refreshTokenRedisRepository.findByMemberIdAndValue(memberId, value)
+    public void deleteRefreshTokenByValue(Long id, String value) {
+        final RefreshToken refreshToken = refreshTokenRedisRepository.findByIdAndValue(id, value)
                 .orElseThrow(JwtInvalidException::new);
         refreshTokenRedisRepository.delete(refreshToken);
     }
 
     @Transactional
-    public void deleteRefreshTokenByMemberIdAndId(Long memberId, String id) {
-        final RefreshToken refreshToken = refreshTokenRedisRepository.findByMemberIdAndId(memberId, id)
+    public void deleteRefreshTokenByIdAndPk(Long id, String pk) {
+        final RefreshToken refreshToken = refreshTokenRedisRepository.findByIdAndPk(id, pk)
                 .orElseThrow(JwtInvalidException::new);
         refreshTokenRedisRepository.delete(refreshToken);
     }
