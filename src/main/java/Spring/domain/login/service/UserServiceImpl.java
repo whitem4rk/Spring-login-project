@@ -1,13 +1,21 @@
 package Spring.domain.login.service;
 
 import Spring.domain.login.dto.RegisterRequest;
+import Spring.domain.login.dto.UpdatePasswordRequest;
 import Spring.domain.login.entity.user.User;
+import Spring.domain.login.exception.AccountMismatchException;
+import Spring.domain.login.exception.PasswordEqualWithOldException;
 import Spring.domain.login.repository.UserRepository;
 import Spring.global.error.EntityAlreadyExistException;
+import Spring.global.util.AuthUtil;
+import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static Spring.global.error.ErrorCode.*;
 
@@ -16,7 +24,11 @@ import static Spring.global.error.ErrorCode.*;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final AuthUtil authUtil;
+    private final JwtUtil jwtUtil;
     private final UserRepository repository;
+    private final RefreshTokenService refreshTokenService;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
     public boolean signup(RegisterRequest registerRequest) {
@@ -29,6 +41,8 @@ public class UserServiceImpl implements UserService {
 
         final String username = registerRequest.getUsername();
         final User user = convertRegisterRequestToUser(registerRequest);
+        final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
+        user.setEncryptedPassword(encryptedPassword);
         repository.save(user);
 
         return true;
@@ -36,8 +50,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUser(String userid) {
-        User user = repository.findByUserid(userid);
-        return user;
+        Optional<User> user = repository.findByUserid(userid);
+        return user.get();
     }
 
     @Override
@@ -48,15 +62,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String findPassword(String userid) {
-        User user = repository.findByUserid(userid);
-        return user.getPassword();
+        Optional<User> user = repository.findByUserid(userid);
+        return user.get().getPassword();
     }
 
     @Override
     @Transactional
-    public void changePassword(String userid, String password, String newPassword) {
-        User user = repository.findByUseridAndPassword(userid, password);
-        user.updatePassword(newPassword);
+    public void changePassword(UpdatePasswordRequest updatePasswordRequest) {
+        final User user = authUtil.getLoginUser();
+        if (!bCryptPasswordEncoder.matches(updatePasswordRequest.getOldPassword(), user.getPassword())) {
+            throw new AccountMismatchException();
+        }
+        if (updatePasswordRequest.getOldPassword().equals(updatePasswordRequest.getNewPassword())) {
+            throw new PasswordEqualWithOldException();
+        }
+        final String encryptedPassword = bCryptPasswordEncoder.encode(updatePasswordRequest.getNewPassword());
+        user.updatePassword(encryptedPassword);
+        repository.save(user);
     }
 
     @Override
@@ -67,8 +89,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void logout(String userid) {
-        return;
+    public void logout(String refreshToken) {
+        refreshTokenService.deleteRefreshTokenByValue(authUtil.getLoginId(), refreshToken);
     }
 
     private User convertRegisterRequestToUser(RegisterRequest registerRequest) {

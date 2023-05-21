@@ -1,6 +1,7 @@
 package Spring.domain.login.service;
 
 import Spring.domain.login.dto.RegisterRequest;
+import Spring.domain.login.dto.UpdatePasswordRequest;
 import Spring.domain.login.entity.user.User;
 import org.springframework.stereotype.Service;
 
@@ -10,10 +11,10 @@ public interface UserService {
     User findUser(String userid);
     User findUser(String userid, String password);
     String findPassword(String userid);
-    void changePassword(String userid, String password, String newPassword);
+    void changePassword(UpdatePasswordRequest updatePasswordRequest);
 
     void deleteUser(String userid, String password);
 
-    void logout(String userid);
+    void logout(String refreshToken);
 
 }
