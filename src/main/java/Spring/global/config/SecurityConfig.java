@@ -52,7 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomExceptionHandlerFilter customExceptionHandlerFilter;
 
-    @Bean
+    @Autowired
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
