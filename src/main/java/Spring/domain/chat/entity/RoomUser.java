@@ -1,37 +1,37 @@
 package Spring.domain.chat.entity;
 
+
 import Spring.domain.login.entity.user.User;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "rooms")
-public class Room {
+@Table(name = "room_users")
+public class RoomUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "room_id")
+    @Column(name = "room_user_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "room")
-    private List<RoomUnreadUser> roomUnreadUsers = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
 
-    @OneToMany(mappedBy = "room")
-    private List<RoomUser> roomUsers = new ArrayList<>();
-
-    public Room(User user) {
+    @Builder
+    public RoomUser(User user, Room room) {
         this.user = user;
+        this.room = room;
     }
 
 }
