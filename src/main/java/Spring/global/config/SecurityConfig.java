@@ -3,18 +3,17 @@ package Spring.global.config;
 import Spring.domain.login.service.CustomUserDetailsService;
 import Spring.global.result.ResultCode;
 import Spring.global.security.CustomRequestMatcher;
-import Spring.global.security.filter.CustomExceptionHandlerFilter;
-import Spring.global.security.filter.CustomUseridPasswordAuthenticationFilter;
-import Spring.global.security.filter.JwtAuthenticationFilter;
-import Spring.global.security.filter.ReissueAuthenticationFilter;
+import Spring.global.security.filter.*;
 import Spring.global.security.handler.CustomAuthenticationEntryPoint;
 import Spring.global.security.handler.CustomAuthenticationFailureHandler;
 import Spring.global.security.handler.CustomAuthenticationSuccessHandler;
+import Spring.global.security.handler.CustomLogoutHandler;
 import Spring.global.security.provider.JwtAuthenticationProvider;
 import Spring.global.security.provider.ReissueAuthenticationProvider;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -41,8 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String[] AUTH_WHITELIST_STATIC = {"/resources/**", "/css/**", "/static/css/**",
             "/static/js/**", "/*.ico"};
-    private static final String[] AUTH_WHITELIST = {"/login", "/login/recovery", "/logout/only/cookie", "/signup",
+    private static final String[] AUTH_WHITELIST = {"/login", "/login/recovery", "/signup",
     "/reissue", "/updatepw"};
+    private static final String LOGOUT_SUCCESS_URL = "/login";
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService jwtUserDetailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -50,6 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final CustomLogoutHandler customLogoutHandler;
     private final CustomExceptionHandlerFilter customExceptionHandlerFilter;
 
     @Autowired
@@ -69,6 +70,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
         filter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         return filter;
+    }
+
+    @Bean
+    public CustomLogoutFilter customLogoutFilter() throws Exception {
+        CustomLogoutFilter customLogoutFilter = new CustomLogoutFilter(LOGOUT_SUCCESS_URL, customLogoutHandler);
+        return customLogoutFilter;
     }
 
     @Bean
@@ -122,14 +129,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-        http.formLogin()
-                .loginPage("/login")
-                .defaultSuccessUrl("/home")
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login");
-
         http.cors()
                 .and()
                 .csrf().disable()
@@ -144,6 +143,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), CustomLogoutFilter.class);
         http.addFilterBefore(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
         http.addFilterBefore(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
 
