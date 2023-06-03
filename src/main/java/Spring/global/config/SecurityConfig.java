@@ -4,10 +4,7 @@ import Spring.domain.login.service.CustomUserDetailsService;
 import Spring.global.result.ResultCode;
 import Spring.global.security.CustomRequestMatcher;
 import Spring.global.security.filter.*;
-import Spring.global.security.handler.CustomAuthenticationEntryPoint;
-import Spring.global.security.handler.CustomAuthenticationFailureHandler;
-import Spring.global.security.handler.CustomAuthenticationSuccessHandler;
-import Spring.global.security.handler.CustomLogoutHandler;
+import Spring.global.security.handler.*;
 import Spring.global.security.provider.JwtAuthenticationProvider;
 import Spring.global.security.provider.ReissueAuthenticationProvider;
 import Spring.global.util.JwtUtil;
@@ -42,7 +39,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             "/static/js/**", "/*.ico"};
     private static final String[] AUTH_WHITELIST = {"/login", "/login/recovery", "/signup",
     "/reissue", "/updatepw"};
-    private static final String LOGOUT_SUCCESS_URL = "/login";
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService jwtUserDetailService;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
@@ -51,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
     private final CustomLogoutHandler customLogoutHandler;
+    private final CustomLogoutSuccessHandler customLogoutSuccessHandler;
     private final CustomExceptionHandlerFilter customExceptionHandlerFilter;
 
     @Autowired
@@ -74,8 +71,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public CustomLogoutFilter customLogoutFilter() throws Exception {
-        CustomLogoutFilter customLogoutFilter = new CustomLogoutFilter(LOGOUT_SUCCESS_URL, customLogoutHandler);
-        return customLogoutFilter;
+        final CustomLogoutFilter filter = new CustomLogoutFilter(customLogoutSuccessHandler, customLogoutHandler);
+        return filter;
     }
 
     @Bean
@@ -141,11 +138,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .anyRequest().hasAuthority("CLIENT");
 
+        http.logout().disable();
+
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
-        http.addFilterBefore(jwtAuthenticationFilter(), CustomLogoutFilter.class);
-        http.addFilterBefore(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
-        http.addFilterBefore(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterAfter(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterAfter(customLogoutFilter(), JwtAuthenticationFilter.class);
+        http.addFilterAfter(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
+        http.addFilterAfter(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
 
     }
 
