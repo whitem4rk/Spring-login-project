@@ -30,7 +30,6 @@ public class JwtUtil {
     private final static String CLAIM_AUTHORITIES_KEY = "authorities";
     private final static String CLAIM_JWT_TYPE_KEY = "type";
     private final static String CLAIM_MEMBER_ID_KEY = "userid";
-    private final static String BEARER_TYPE_PREFIX = "Bearer ";
     private final static String BEARER_TYPE = "Bearer";
     private final static String ACCESS_TOKEN_SUBJECT = "accessToken";
     private final static String REFRESH_TOKEN_SUBJECT = "refreshToken";
@@ -44,6 +43,25 @@ public class JwtUtil {
 
     public JwtUtil(@Value("${jwt.key}") byte[] key) {
         this.JWT_KEY = Keys.hmacShaKeyFor(key);
+    }
+
+    public String regenerateAccessJwt(Authentication authentication) {
+        final String authoritiesString = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        final long currentTime = (new Date()).getTime();
+        final Date accessTokenExpiresIn = new Date(currentTime + ACCESS_TOKEN_EXPIRES);
+
+        final String accessToken = Jwts.builder()
+                .setSubject(ACCESS_TOKEN_SUBJECT)
+                .claim(CLAIM_MEMBER_ID_KEY, authentication.getName())
+                .claim(CLAIM_AUTHORITIES_KEY, authoritiesString)
+                .claim(CLAIM_JWT_TYPE_KEY, BEARER_TYPE)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(JWT_KEY, SignatureAlgorithm.HS512)
+                .compact();
+
+        return accessToken;
     }
 
     public JwtDto generateJwtDto(Authentication authentication) {
@@ -116,7 +134,8 @@ public class JwtUtil {
                         claims.get(CLAIM_AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        final org.springframework.security.core.userdetails.User principal = new org.springframework.security.core.userdetails.User((String) claims.get(CLAIM_MEMBER_ID_KEY), "", authorities);
+        final org.springframework.security.core.userdetails.User principal =
+                new org.springframework.security.core.userdetails.User((String) claims.get(CLAIM_MEMBER_ID_KEY), "", authorities);
 
         return JwtAuthenticationToken.of(principal, token, authorities);
     }
@@ -132,14 +151,25 @@ public class JwtUtil {
         }
     }
 
-    public String extractJwt(Cookie[] cookies) {
+    public boolean expirationCheck(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(JWT_KEY).build().parseClaimsJws(token).getBody();
+            return true;
+        }catch (ExpiredJwtException e) {
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String extractJwt(Cookie[] cookies, String cookieName) {
         if (cookies == null) {
             throw new JwtInvalidException();
         }
 
         String cookieToken = null;
         for (Cookie c : cookies) {
-            if (c.getName().equals(ACCESS_TOKEN_SUBJECT)) {
+            if (c.getName().equals(cookieName)) {
                 cookieToken = c.getValue();
             }
         }
