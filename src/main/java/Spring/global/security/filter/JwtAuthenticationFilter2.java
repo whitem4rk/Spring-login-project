@@ -1,11 +1,14 @@
 package Spring.global.security.filter;
 
+import Spring.global.security.CustomRequestMatcher;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,23 +25,20 @@ import java.util.List;
 public class JwtAuthenticationFilter2 extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    private List<String> allowedPaths;
+    private RequestMatcher matcher;
     private final static String ACCESS_TOKEN_SUBJECT = "accessToken";
     private final static String REFRESH_TOKEN_SUBJECT = "refreshToken";
 
-    @Autowired
-    public JwtAuthenticationFilter2(List<String> allowedPaths, JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter2(RequestMatcher matcher, JwtUtil jwtUtil) {
+        this.matcher = matcher;
         this.jwtUtil = jwtUtil;
-        this.allowedPaths = allowedPaths;
     }
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        final String requestURI = request.getRequestURI();
-
-        if (!isAllowedPath(requestURI)) {
+        if (!isAllowedPath(request)) {
             final Cookie[] cookies = request.getCookies();
             final String accessJwt = jwtUtil.extractJwt(cookies, ACCESS_TOKEN_SUBJECT);
 
@@ -57,11 +57,13 @@ public class JwtAuthenticationFilter2 extends OncePerRequestFilter {
                     response.sendRedirect("/login");
                 }
             }
+            super.doFilter(request, response, filterChain);
+        } else {
+            filterChain.doFilter(request, response);
         }
-        filterChain.doFilter(request, response);
     }
 
-    private boolean isAllowedPath(String path) {
-        return allowedPaths.stream().anyMatch(path::startsWith);
+    private boolean isAllowedPath(HttpServletRequest request) {
+        return !this.matcher.matches(request);
     }
 }
