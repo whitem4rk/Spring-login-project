@@ -25,15 +25,15 @@ class RefreshTokenTest {
     public void enroll() {
         //given
         RefreshToken refreshToken = RefreshToken.builder()
-                .memberId(100L)
+                .id(100L)
                 .value("100")
                 .build();
         //when
         refreshTokenRedisRepository.save(refreshToken);
 
         //then
-        RefreshToken refreshToken1 = refreshTokenRedisRepository.findByMemberIdAndValue(100L, "100").get();
-        Assertions.assertThat(refreshToken1.getMemberId()).isEqualTo(100L);
+        RefreshToken refreshToken1 = refreshTokenRedisRepository.findByIdAndValue(100L, "100").get();
+        Assertions.assertThat(refreshToken1.getId()).isEqualTo(100L);
         Assertions.assertThat(refreshToken1.getValue()).isEqualTo("100");
     }
 
