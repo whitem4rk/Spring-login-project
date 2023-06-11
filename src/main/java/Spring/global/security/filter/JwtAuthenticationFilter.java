@@ -31,29 +31,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (!isAllowedPath(request)) {
-            final Cookie[] cookies = request.getCookies();
-            final String accessJwt = jwtUtil.extractJwt(cookies, ACCESS_TOKEN_SUBJECT);
 
-            if (jwtUtil.expirationCheck(accessJwt)) {
-                Authentication authentication = jwtUtil.getAuthentication(accessJwt);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            } else {
-                String refreshJwt = jwtUtil.extractJwt(cookies, REFRESH_TOKEN_SUBJECT);
-
-                if (jwtUtil.expirationCheck(refreshJwt)) {
-                    Authentication authentication = jwtUtil.getAuthentication(refreshJwt);
-                    final String newAccessJwt = jwtUtil.regenerateAccessJwt(authentication);
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    response.addCookie(new Cookie(ACCESS_TOKEN_SUBJECT, newAccessJwt));
-                } else {
-                    response.sendRedirect("/login");
-                }
-            }
-            super.doFilter(request, response, filterChain);
-        } else {
+        if (isAllowedPath(request)) {
             filterChain.doFilter(request, response);
+            return;
         }
+
+        final Cookie[] cookies = request.getCookies();
+        final Cookie accessJwt = jwtUtil.extractJwt(cookies, ACCESS_TOKEN_SUBJECT);
+        final Cookie refreshJwt = jwtUtil.extractJwt(cookies, REFRESH_TOKEN_SUBJECT);
+
+
+        if (jwtUtil.expirationCheck(accessJwt.getValue())) {
+            Authentication authentication = jwtUtil.getAuthentication(accessJwt.getValue());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            response.addCookie(new Cookie(ACCESS_TOKEN_SUBJECT, accessJwt.getValue()));
+        } else if (jwtUtil.expirationCheck(refreshJwt.getValue())) {
+            Authentication authentication = jwtUtil.getAuthentication(refreshJwt.getValue());
+            final String newAccessJwt = jwtUtil.regenerateAccessJwt(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            response.addCookie(new Cookie(ACCESS_TOKEN_SUBJECT, newAccessJwt));
+        } else {
+            response.sendRedirect("/login");
+            return;
+        }
+
+        super.doFilter(request, response, filterChain);
     }
 
     private boolean isAllowedPath(HttpServletRequest request) {

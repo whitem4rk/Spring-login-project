@@ -154,23 +154,13 @@ public class JwtUtil {
         }
     }
 
-    public String extractJwt(Cookie[] cookies, String cookieName) {
-        if (cookies == null) {
-            throw new JwtInvalidException();
-        }
+    public Cookie extractJwt(Cookie[] cookies, String cookieName) {
+        final Cookie cookie = Arrays.stream(cookies)
+                .filter(c -> c.getName().equals(cookieName))
+                .findFirst()
+                .orElse(null);
 
-        String cookieToken = null;
-        for (Cookie c : cookies) {
-            if (c.getName().equals(cookieName)) {
-                cookieToken = c.getValue();
-            }
-        }
-
-        if (cookieToken == null) {
-            throw new JwtInvalidException();
-        }
-
-        return cookieToken;
+        return cookie;
     }
 
 }

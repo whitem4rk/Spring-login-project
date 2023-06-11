@@ -5,7 +5,6 @@ import Spring.global.result.ResultCode;
 import Spring.global.security.CustomRequestMatcher;
 import Spring.global.security.filter.*;
 import Spring.global.security.handler.*;
-import Spring.global.security.provider.ReissueAuthenticationProvider;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     "/reissue", "/updatepw"};
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService jwtUserDetailService;
-    private final ReissueAuthenticationProvider reissueAuthenticationProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
@@ -79,17 +77,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         skipPaths.addAll(Arrays.stream(AUTH_WHITELIST_STATIC).collect(Collectors.toList()));
         skipPaths.addAll(Arrays.stream(AUTH_WHITELIST).collect(Collectors.toList()));
         final RequestMatcher matcher = new CustomRequestMatcher(skipPaths);
-        final JwtAuthenticationFilter filter2 = new JwtAuthenticationFilter(matcher, jwtUtil);
+        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(matcher, jwtUtil);
 
-        return filter2;
-    }
-
-    @Bean
-    public ReissueAuthenticationFilter reissueAuthenticationFilter() throws Exception {
-        final ReissueAuthenticationFilter filter = new ReissueAuthenticationFilter();
-        filter.setAuthenticationManager(super.authenticationManager());
-        filter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler);
-        filter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         return filter;
     }
 
@@ -103,8 +92,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(reissueAuthenticationProvider)
-                .authenticationProvider(daoAuthenticationProvider());
+        auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
@@ -134,11 +122,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().hasAuthority("CLIENT");
 
         http.logout().disable();
+
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
         http.addFilterAfter(customLogoutFilter(), JwtAuthenticationFilter.class);
         http.addFilterAfter(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
-        http.addFilterAfter(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
 
     }
 
