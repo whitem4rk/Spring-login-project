@@ -28,12 +28,9 @@ import java.util.stream.Collectors;
 public class JwtUtil {
 
     private final static String CLAIM_AUTHORITIES_KEY = "authorities";
-    private final static String CLAIM_JWT_TYPE_KEY = "type";
     private final static String CLAIM_MEMBER_ID_KEY = "userid";
-    private final static String BEARER_TYPE = "Bearer";
     private final static String ACCESS_TOKEN_SUBJECT = "accessToken";
     private final static String REFRESH_TOKEN_SUBJECT = "refreshToken";
-    private static final int JWT_PREFIX_LENGTH = 7;
     private final Key JWT_KEY;
     @Value("${access-token-expires}")
     private long ACCESS_TOKEN_EXPIRES;
@@ -56,7 +53,6 @@ public class JwtUtil {
                 .setSubject(ACCESS_TOKEN_SUBJECT)
                 .claim(CLAIM_MEMBER_ID_KEY, authentication.getName())
                 .claim(CLAIM_AUTHORITIES_KEY, authoritiesString)
-                .claim(CLAIM_JWT_TYPE_KEY, BEARER_TYPE)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(JWT_KEY, SignatureAlgorithm.HS512)
                 .compact();
@@ -77,7 +73,6 @@ public class JwtUtil {
                 .setSubject(ACCESS_TOKEN_SUBJECT)
                 .claim(CLAIM_MEMBER_ID_KEY, authentication.getName())
                 .claim(CLAIM_AUTHORITIES_KEY, authoritiesString)
-                .claim(CLAIM_JWT_TYPE_KEY, BEARER_TYPE)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(JWT_KEY, SignatureAlgorithm.HS512)
                 .compact();
@@ -91,7 +86,6 @@ public class JwtUtil {
                 .compact();
 
         return JwtDto.builder()
-                .type(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -108,7 +102,6 @@ public class JwtUtil {
                 .setSubject(ACCESS_TOKEN_SUBJECT)
                 .claim(CLAIM_MEMBER_ID_KEY, user.getUserid().toString())
                 .claim(CLAIM_AUTHORITIES_KEY, authoritiesString)
-                .claim(CLAIM_JWT_TYPE_KEY, BEARER_TYPE)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(JWT_KEY, SignatureAlgorithm.HS512)
                 .compact();
@@ -122,7 +115,6 @@ public class JwtUtil {
                 .compact();
 
         return JwtDto.builder()
-                .type(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

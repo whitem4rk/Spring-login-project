@@ -5,7 +5,6 @@ import Spring.global.result.ResultCode;
 import Spring.global.security.CustomRequestMatcher;
 import Spring.global.security.filter.*;
 import Spring.global.security.handler.*;
-import Spring.global.security.provider.JwtAuthenticationProvider;
 import Spring.global.security.provider.ReissueAuthenticationProvider;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +40,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     "/reissue", "/updatepw"};
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService jwtUserDetailService;
-    private final JwtAuthenticationProvider jwtAuthenticationProvider;
     private final ReissueAuthenticationProvider reissueAuthenticationProvider;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler;
@@ -76,27 +74,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public JwtAuthenticationFilter2 jwtAuthenticationFilter2() throws Exception {
-        final List<String> skipPaths = new ArrayList<>();
-        skipPaths.addAll(Arrays.stream(AUTH_WHITELIST_STATIC).collect(Collectors.toList()));
-        skipPaths.addAll(Arrays.stream(AUTH_WHITELIST).collect(Collectors.toList()));
-        final RequestMatcher matcher = new CustomRequestMatcher(skipPaths);
-        final JwtAuthenticationFilter2 filter2 = new JwtAuthenticationFilter2(matcher, jwtUtil);
-
-        return filter2;
-    }
-
-    @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
         final List<String> skipPaths = new ArrayList<>();
         skipPaths.addAll(Arrays.stream(AUTH_WHITELIST_STATIC).collect(Collectors.toList()));
         skipPaths.addAll(Arrays.stream(AUTH_WHITELIST).collect(Collectors.toList()));
         final RequestMatcher matcher = new CustomRequestMatcher(skipPaths);
-        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(matcher, jwtUtil);
+        final JwtAuthenticationFilter filter2 = new JwtAuthenticationFilter(matcher, jwtUtil);
 
-        filter.setAuthenticationManager(super.authenticationManager());
-        filter.setAuthenticationFailureHandler(authenticationEntryPointFailureHandler());
-        return filter;
+        return filter2;
     }
 
     @Bean
@@ -119,8 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.authenticationProvider(reissueAuthenticationProvider)
-                .authenticationProvider(daoAuthenticationProvider())
-                .authenticationProvider(jwtAuthenticationProvider);
+                .authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
@@ -150,12 +134,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().hasAuthority("CLIENT");
 
         http.logout().disable();
-        http.addFilterBefore(jwtAuthenticationFilter2(), UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterAfter(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter2.class);
-        http.addFilterAfter(customLogoutFilter(), JwtAuthenticationFilter2.class);
-        http.addFilterAfter(customExceptionHandlerFilter, JwtAuthenticationFilter2.class);
-        http.addFilterAfter(reissueAuthenticationFilter(), JwtAuthenticationFilter2.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(customUseridPasswordAuthenticationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterAfter(customLogoutFilter(), JwtAuthenticationFilter.class);
+        http.addFilterAfter(customExceptionHandlerFilter, JwtAuthenticationFilter.class);
+        http.addFilterAfter(reissueAuthenticationFilter(), JwtAuthenticationFilter.class);
 
     }
 
