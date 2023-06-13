@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum ErrorCode {
     // Member
     MEMBER_NOT_FOUND(400, "M001", "존재 하지 않는 유저입니다."),
+    SIGHUP_FAIL(400, "M010", "회원 가입에 실패하였습니다."),
     USERNAME_ALREADY_EXIST(400, "M002", "이미 존재하는 사용자 이름입니다."),
     USERID_ALREADY_EXIST(400, "M003", "이미 존재하는 사용자 이름입니다."),
     AUTHENTICATION_FAIL(401, "M004", "로그인이 필요한 화면입니다."),

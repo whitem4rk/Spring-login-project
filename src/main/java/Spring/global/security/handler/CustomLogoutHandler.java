@@ -23,8 +23,9 @@ public class CustomLogoutHandler implements LogoutHandler {
         final Cookie refreshToken = Arrays.stream(request.getCookies())
                 .filter(c -> c.getName().equals("refreshToken"))
                 .findFirst()
-                .orElseThrow(JwtInvalidException::new);
-
-        userService.logout(refreshToken.getValue());
+                .orElse(null);
+        if (refreshToken != null) {
+            userService.logout(refreshToken.getValue());
+        }
     }
 }
