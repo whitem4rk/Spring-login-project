@@ -28,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final UserRepository repository;
     private final RefreshTokenService refreshTokenService;
+    private final EmailCodeService emailCodeService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Transactional
@@ -40,12 +41,25 @@ public class UserServiceImpl implements UserService {
         }
 
         final String username = registerRequest.getUsername();
+        if (!emailCodeService.checkRegisterCode(username, registerRequest.getEmail(), registerRequest.getCode())) {
+            return false;
+        }
+
+
         final User user = convertRegisterRequestToUser(registerRequest);
         final String encryptedPassword = bCryptPasswordEncoder.encode(user.getPassword());
         user.setEncryptedPassword(encryptedPassword);
         repository.save(user);
 
         return true;
+    }
+
+    @Override
+    public void sendEmailConfirmation(String userid, String email) {
+        if (repository.existsByUserid(userid)) {
+            throw new EntityAlreadyExistException(USERID_ALREADY_EXIST);
+        }
+        emailCodeService.sendRegisterCode(userid, email);
     }
 
     @Override

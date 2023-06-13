@@ -2,6 +2,7 @@ package Spring.domain.login.controller;
 
 import Spring.domain.login.dto.LoginRequest;
 import Spring.domain.login.dto.RegisterRequest;
+import Spring.domain.login.dto.SendConfirmationEmailRequest;
 import Spring.domain.login.dto.UpdatePasswordRequest;
 import Spring.domain.login.entity.user.User;
 import Spring.domain.login.exception.FilterMustResponseException;
@@ -12,6 +13,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import Spring.global.error.ErrorCode;
+import Spring.global.result.ResultCode;
 import Spring.global.util.AuthUtil;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 @Slf4j
 @Controller
@@ -61,13 +66,20 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public String signup(@Valid @ModelAttribute("registerForm") RegisterRequest registerRequest) {
+    public String signup(@Valid @ModelAttribute("registerForm") RegisterRequest registerRequest)
+            throws UnsupportedEncodingException {
         final boolean isRegistered = userService.signup(registerRequest);
         if (isRegistered) {
-            return "redirect:/login";
+            return "/codeConfirm";
         } else {
-            return "/signup";
+            final String errorMsg = URLEncoder.encode(ErrorCode.SIGHUP_FAIL.getMessage(), "UTF-8");
+            return "/signup?error=" + errorMsg;
         }
+    }
+
+    @GetMapping("/chat")
+    public String chat() {
+        return "/chat";
     }
 
     @PostMapping("/logout")
@@ -77,15 +89,19 @@ public class UserController {
         throw new FilterMustResponseException();
     }
 
-    @PostMapping("/reissue")
-    public String reissue(@CookieValue(value = "refreshToken", required = false) Cookie refreshCookie) {
-        throw new JwtInvalidException();
+    @PostMapping("/sendCode")
+    public String sendConfirmEmail(
+            @Valid @RequestBody SendConfirmationEmailRequest sendConfirmationEmailRequest) {
+        userService.sendEmailConfirmation(sendConfirmationEmailRequest.getUserid(), sendConfirmationEmailRequest.getEmail());
+
+        return "/codeConfirm";
     }
+
 
     @PutMapping("/updatepw")
     public String updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         userService.changePassword(updatePasswordRequest);
 
-        return "redirect:/login";
+        return "/login";
     }
 }
