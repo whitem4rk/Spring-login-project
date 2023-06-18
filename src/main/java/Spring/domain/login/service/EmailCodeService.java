@@ -27,8 +27,7 @@ public class EmailCodeService {
 
     public void sendRegisterCode(String userid, String email) {
         final String code = createConfirmationCode(REGISTER_CODE_LENGTH);
-        emailService.sendHtmlTextEmail(userid + REGISTER_EMAIL_SUBJECT_POSTFIX, getRegisterEmailText(email, code)
-                , email);
+        emailService.sendHtmlTextEmail(userid + REGISTER_EMAIL_SUBJECT_POSTFIX, code, email);
 
         final RegisterCode registerCode = RegisterCode.builder()
                 .userid(userid)

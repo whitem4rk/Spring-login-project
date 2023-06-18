@@ -15,6 +15,7 @@ import javax.validation.Valid;
 
 import Spring.global.error.ErrorCode;
 import Spring.global.result.ResultCode;
+import Spring.global.result.ResultResponse;
 import Spring.global.util.AuthUtil;
 import Spring.global.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +71,7 @@ public class UserController {
             throws UnsupportedEncodingException {
         final boolean isRegistered = userService.signup(registerRequest);
         if (isRegistered) {
-            return "/codeConfirm";
+            return "/login";
         } else {
             final String errorMsg = URLEncoder.encode(ErrorCode.SIGHUP_FAIL.getMessage(), "UTF-8");
             return "/signup?error=" + errorMsg;
@@ -90,11 +91,11 @@ public class UserController {
     }
 
     @PostMapping("/sendCode")
-    public String sendConfirmEmail(
+    public ResponseEntity<ResultResponse> sendConfirmEmail(
             @Valid @RequestBody SendConfirmationEmailRequest sendConfirmationEmailRequest) {
         userService.sendEmailConfirmation(sendConfirmationEmailRequest.getUserid(), sendConfirmationEmailRequest.getEmail());
 
-        return "/codeConfirm";
+        return ResponseEntity.ok(ResultResponse.of(ResultCode.SEND_CONFIRM_EMAIL_SUCCESS));
     }
 
 

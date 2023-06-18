@@ -2,6 +2,7 @@ package Spring.domain.login.service;
 
 import Spring.domain.login.exception.EmailSendFailException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -18,14 +19,14 @@ public class EmailService {
 
     @Async
     public void sendHtmlTextEmail(String subject, String content, String email) {
-        final MimeMessage message = javaMailSender.createMimeMessage();
+        final SimpleMailMessage message = new SimpleMailMessage();
         try {
-            final MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, ENCODING_UTF8);
-            messageHelper.setTo(email);
-            messageHelper.setSubject(subject);
-            messageHelper.setText(content, true);
+            message.setTo(email);
+            message.setSubject(subject);
+            message.setText(content);
             javaMailSender.send(message);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new EmailSendFailException();
         }
     }

@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private static final String[] AUTH_WHITELIST_STATIC = {"/resources/**", "/css/**", "/static/css/**",
-            "/static/js/**", "/*.ico"};
-    private static final String[] AUTH_WHITELIST = {"/login", "/login/recovery", "/signup",
+            "/static/js/**", "/js/**", "/*.ico"};
+    private static final String[] AUTH_WHITELIST = {"/login", "/login/recovery", "/signup", "/sendCode",
     "/reissue", "/updatepw"};
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService jwtUserDetailService;
